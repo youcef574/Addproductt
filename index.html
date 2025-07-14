@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajouter un nouveau produit - YouZinElegancia</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- External CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="header-left">
+                <a href="#" class="logo">
+                    <i class="fas fa-gem"></i>
+                    <span>YouZinElegancia</span>
+                </a>
+            </div>
+            
+            <div class="header-right">
+                <button class="lang-toggle" id="langToggle">
+                    <i class="fas fa-globe"></i>
+                    <span id="langText">Français</span>
+                </button>
+                
+                <div class="user-menu">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-user-circle"></i>
+                    </button>
+                    
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span data-key="dashboard">Tableau de bord</span>
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            <span data-key="settings">Paramètres</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item text-danger">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span data-key="logout">Déconnexion</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-plus-circle"></i>
+                <span data-key="add_new_product">Ajouter un nouveau produit</span>
+            </h1>
+            <p class="page-subtitle" data-key="fill_product_info">
+                Remplissez les informations ci-dessous pour ajouter votre produit
+            </p>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-header">
+                <h3 data-key="form_progress">Progression du formulaire</h3>
+                <span class="progress-percentage" id="progressPercentage">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Progression: 0%</div>
+        </div>
+
+        <!-- Product Form -->
+        <form class="product-form" id="productForm">
+            
+            <!-- Basic Information Section -->
+            <div class="form-section" data-section="basic">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="section-title-container">
+                        <h2 class="section-title" data-key="basic_information">Informations de base</h2>
+                        <p class="section-subtitle" data-key="essential_product_details">Détails essentiels du produit</p>
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label for="productName" data-key="product_name">Nom du produit</label>
+                        <div class="input-container">
+                            <input type="text" id="productName" name="productName" required>
+                            <div class="input-icon">
+                                <i class="fas fa-tag"></i>
+                            </div>
+                        </div>
+                        <div class="error-message" id="productNameError"></div>
+                    </div>
+                    
+                    <div class="form-field">
+                        <label for="productPrice" data-key="price_dzd">Prix (DZD)</label>
+                        <div class="input-container">
+                            <input type="number" id="productPrice" name="productPrice" min="0" step="0.01" required>
+                            <div class="input-icon">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                        </div>
+                        <div class="error-message" id="productPriceError"></div>
+                    </div>
+                    
+                    <div class="form-field">
+                        <label for="productQuantity" data-key="quantity_optional">Quantité (optionnel)</label>
+                        <div class="input-container">
+                            <input type="number" id="productQuantity" name="productQuantity" min="0">
+                            <div class="input-icon">
+                                <i class="fas fa-boxes"></i>
+                            </div>
+                        </div>
+                        <div class="error-message" id="productQuantityError"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description Section -->
+            <div class="form-section" data-section="description">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-align-left"></i>
+                    </div>
+                    <div class="section-title-container">
+                        <h2 class="section-title" data-key="product_description">Description du produit</h2>
+                        <p class="section-subtitle" data-key="describe_product_detail">Décrivez votre produit en détail</p>
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-field full-width">
+                        <label for="shortDescription" data-key="short_description">Description courte</label>
+                        <div class="input-container">
+                            <textarea id="shortDescription" name="shortDescription" rows="3" required></textarea>
+                            <div class="input-icon">
+                                <i class="fas fa-align-left"></i>
+                            </div>
+                        </div>
+                        <div class="error-message" id="shortDescriptionError"></div>
+                    </div>
+                    
+                    <div class="form-field full-width">
+                        <label for="detailedDescription" data-key="detailed_description">Description détaillée</label>
+                        <div class="input-container">
+                            <textarea id="detailedDescription" name="detailedDescription" rows="6" required></textarea>
+                            <div class="input-icon">
+                                <i class="fas fa-file-text"></i>
+                            </div>
+                        </div>
+                        <div class="error-message" id="detailedDescriptionError"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Section -->
+            <div class="form-section" data-section="images">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-images"></i>
+                    </div>
+                    <div class="section-title-container">
+                        <h2 class="section-title" data-key="product_images">Images du produit</h2>
+                        <p class="section-subtitle" data-key="add_attractive_images">Ajoutez des images attrayantes</p>
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-field full-width">
+                        <label for="mainImage" data-key="main_image">Image principale</label>
+                        <div class="dropzone" id="mainImageDropzone">
+                            <div class="dropzone-content">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <h4 data-key="drop_main_image_here">Glissez votre image principale ici</h4>
+                                <p data-key="or_click_to_select">ou cliquez pour sélectionner</p>
+                                <small data-key="png_jpg_webp_5mb">PNG, JPG, WEBP jusqu'à 5MB</small>
+                            </div>
+                            <input type="file" id="mainImage" name="mainImage" accept="image/*" style="display: none;">
+                        </div>
+                        <div class="error-message" id="mainImageError"></div>
+                    </div>
+                    
+                    <div class="form-field full-width">
+                        <label for="imageGallery" data-key="image_gallery">Galerie d'images</label>
+                        <div class="dropzone" id="imageGalleryDropzone">
+                            <div class="dropzone-content">
+                                <i class="fas fa-images"></i>
+                                <h4 data-key="add_additional_images">Ajoutez des images supplémentaires</h4>
+                                <p data-key="up_to_5_images">Jusqu'à 5 images</p>
+                                <small data-key="png_jpg_webp_5mb_each">PNG, JPG, WEBP jusqu'à 5MB chacune</small>
+                            </div>
+                            <input type="file" id="imageGallery" name="imageGallery" accept="image/*" multiple style="display: none;">
+                        </div>
+                        <div class="error-message" id="imageGalleryError"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Variants Section -->
+            <div class="form-section" data-section="variants">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <div class="section-title-container">
+                        <h2 class="section-title" data-key="product_variants">Variantes du produit</h2>
+                        <p class="section-subtitle" data-key="add_options_color_size">Ajoutez des options comme la couleur, la taille</p>
+                    </div>
+                    <button type="button" class="add-variant-btn" id="addVariantBtn">
+                        <i class="fas fa-plus"></i>
+                        <span data-key="add_variant">Ajouter une variante</span>
+                    </button>
+                </div>
+                
+                <div id="variantsContainer" class="variants-container">
+                    <!-- Variants will be dynamically added here -->
+                </div>
+            </div>
+
+            <!-- Additional Options Section -->
+            <div class="form-section" data-section="options">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div class="section-title-container">
+                        <h2 class="section-title" data-key="additional_options">Options supplémentaires</h2>
+                        <p class="section-subtitle" data-key="advanced_product_settings">Paramètres avancés du produit</p>
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="radio-label" data-key="store_visibility">Visibilité dans la boutique</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="storeVisibility" value="visible" checked>
+                                <span class="radio-custom"></span>
+                                <span data-key="visible">Visible</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="storeVisibility" value="hidden">
+                                <span class="radio-custom"></span>
+                                <span data-key="hidden">Caché</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons Section -->
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" id="resetBtn">
+                    <i class="fas fa-undo"></i>
+                    <span data-key="reset">Réinitialiser</span>
+                </button>
+                
+                <button type="button" class="btn btn-outline" id="previewBtn">
+                    <i class="fas fa-eye"></i>
+                    <span data-key="preview">Aperçu</span>
+                </button>
+                
+                <button type="button" class="btn btn-warning" id="draftBtn">
+                    <i class="fas fa-save"></i>
+                    <span data-key="save_as_draft">Enregistrer comme brouillon</span>
+                </button>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-check"></i>
+                    <span data-key="save_product">Enregistrer le produit</span>
+                </button>
+            </div>
+        </form>
+    </main>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle"></h3>
+                <button class="modal-close" id="modalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-message" id="modalMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="modalConfirm" data-key="ok">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p data-key="saving">Enregistrement en cours...</p>
+        </div>
+    </div>
+
+    <!-- External JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
