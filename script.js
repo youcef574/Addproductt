@@ -370,15 +370,28 @@ function displaySelectedFile(file, dropzoneId) {
     if (!dropzone) return;
     
     const content = dropzone.querySelector('.dropzone-content');
-    content.innerHTML = `
-        <div class="selected-file">
-            <i class="fas fa-image"></i>
-            <span>${file.name}</span>
-            <button type="button" class="remove-file" onclick="removeMainImage()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-    `;
+    
+    // Create image preview
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        content.innerHTML = `
+            <div class="image-preview-container">
+                <div class="image-preview">
+                    <img src="${e.target.result}" alt="${file.name}" class="preview-image">
+                    <div class="image-overlay">
+                        <button type="button" class="remove-image-btn" onclick="removeMainImage()">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="image-info">
+                    <span class="image-name">${file.name}</span>
+                    <span class="image-size">${formatFileSize(file.size)}</span>
+                </div>
+            </div>
+        `;
+    };
+    reader.readAsDataURL(file);
 }
 
 function displaySelectedFiles(files, dropzoneId) {
@@ -386,23 +399,74 @@ function displaySelectedFiles(files, dropzoneId) {
     if (!dropzone) return;
     
     const content = dropzone.querySelector('.dropzone-content');
-    content.innerHTML = `
-        <div class="selected-files">
-            ${files.map((file, index) => `
-                <div class="selected-file">
-                    <i class="fas fa-image"></i>
-                    <span>${file.name}</span>
-                    <button type="button" class="remove-file" onclick="removeGalleryImage(${index})">
-                        <i class="fas fa-times"></i>
-                    </button>
+    
+    if (files.length === 0) {
+        content.innerHTML = `
+            <i class="fas fa-images"></i>
+            <h4 data-key="add_additional_images">Ajoutez des images supplémentaires</h4>
+            <p data-key="up_to_5_images">Jusqu'à 5 images</p>
+            <small data-key="png_jpg_webp_5mb_each">PNG, JPG, WEBP jusqu'à 5MB chacune</small>
+        `;
+        return;
+    }
+    
+    let imagesHtml = '<div class="gallery-preview-container">';
+    let loadedImages = 0;
+    
+    files.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const imageHtml = `
+                <div class="gallery-image-preview" data-index="${index}">
+                    <img src="${e.target.result}" alt="${file.name}" class="gallery-preview-image">
+                    <div class="gallery-image-overlay">
+                        <button type="button" class="remove-gallery-btn" onclick="removeGalleryImage(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="gallery-image-info">
+                        <span class="gallery-image-name">${file.name}</span>
+                        <span class="gallery-image-size">${formatFileSize(file.size)}</span>
+                    </div>
                 </div>
-            `).join('')}
-        </div>
-    `;
+            `;
+            
+            loadedImages++;
+            if (loadedImages === 1) {
+                imagesHtml += imageHtml;
+            } else {
+                const container = content.querySelector('.gallery-preview-container');
+                if (container) {
+                    container.insertAdjacentHTML('beforeend', imageHtml);
+                }
+            }
+            
+            if (loadedImages === files.length) {
+                imagesHtml += '</div>';
+                if (loadedImages === 1) {
+                    content.innerHTML = imagesHtml;
+                }
+            }
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
 function removeMainImage() {
     formData.mainImage = null;
+    const mainImageInput = document.getElementById('mainImage');
+    if (mainImageInput) {
+        mainImageInput.value = '';
+    }
+    
     const dropzone = document.getElementById('mainImageDropzone');
     if (dropzone) {
         const content = dropzone.querySelector('.dropzone-content');
@@ -412,6 +476,7 @@ function removeMainImage() {
             <p data-key="or_click_to_select">ou cliquez pour sélectionner</p>
             <small data-key="png_jpg_webp_5mb">PNG, JPG, WEBP jusqu'à 5MB</small>
         `;
+        updateLanguage(); // Re-apply translations
     }
     calculateProgress();
     showToast('info', translate('info'), 'Image principale supprimée');
@@ -419,6 +484,10 @@ function removeMainImage() {
 
 function removeGalleryImage(index) {
     formData.galleryImages.splice(index, 1);
+    const galleryInput = document.getElementById('imageGallery');
+    if (galleryInput) {
+        galleryInput.value = '';
+    }
     displaySelectedFiles(formData.galleryImages, 'imageGalleryDropzone');
     calculateProgress();
     showToast('info', translate('info'), 'Image supprimée de la galerie');
