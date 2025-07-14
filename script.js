@@ -69,56 +69,18 @@ const translations = {
         'up_to_5_images': 'Jusqu\'à 5 images',
         'png_jpg_webp_5mb_each': 'PNG, JPG, WEBP jusqu\'à 5MB chacune',
         
-        // Variants
-        'variant': 'Variante',
-        'enter_variant_name': 'Entrez le nom de la variante (ex: Couleur, Taille)',
-        'enter_variant_value': 'Entrez une valeur et appuyez sur Entrée',
-        
-        // Validation Messages
-        'field_required': 'Ce champ est requis',
-        'min_length': 'Minimum {min} caractères requis',
-        'max_length': 'Maximum {max} caractères autorisés',
-        'invalid_price': 'Veuillez entrer un prix valide',
-        'invalid_quantity': 'Veuillez entrer une quantité valide',
-        'invalid_file_format': 'Format de fichier non supporté',
-        'file_too_large': 'Fichier trop volumineux (max {size}MB)',
-        'max_images_reached': 'Maximum {max} images autorisées',
-        'duplicate_value': 'Cette valeur existe déjà',
-        'max_values_reached': 'Maximum {max} valeurs autorisées',
-        'variant_name_required': 'Le nom de la variante est requis',
-        'variant_values_required': 'Au moins une valeur est requise',
-        
-        // Success Messages
+        // Messages
         'product_saved': 'Produit enregistré avec succès',
         'draft_saved': 'Brouillon enregistré',
         'form_reset': 'Formulaire réinitialisé',
         'variant_added': 'Variante ajoutée',
         'variant_removed': 'Variante supprimée',
-        'value_added': 'Valeur ajoutée',
-        'value_removed': 'Valeur supprimée',
-        'auto_save_restored': 'Données sauvegardées automatiquement restaurées',
-        
-        // Error Messages
-        'save_error': 'Erreur lors de l\'enregistrement du produit',
-        'network_error': 'Erreur réseau',
-        'validation_error': 'Veuillez corriger les erreurs dans le formulaire',
-        'load_error': 'Erreur lors du chargement des données',
-        
-        // Modal
+        'field_required': 'Ce champ est requis',
+        'saving': 'Enregistrement en cours...',
         'success': 'Succès',
         'error': 'Erreur',
         'warning': 'Avertissement',
-        'confirm': 'Confirmation',
-        'info': 'Information',
-        
-        // Loading
-        'saving': 'Enregistrement en cours...',
-        'loading': 'Chargement en cours...',
-        'processing': 'Traitement en cours...',
-        
-        // Other
-        'confirm_action': 'Êtes-vous sûr de vouloir effectuer cette action?',
-        'unsaved_changes': 'Vous avez des modifications non sauvegardées. Voulez-vous vraiment quitter?'
+        'info': 'Information'
     },
     en: {
         // Header & Navigation
@@ -177,56 +139,18 @@ const translations = {
         'up_to_5_images': 'Up to 5 images',
         'png_jpg_webp_5mb_each': 'PNG, JPG, WEBP up to 5MB each',
         
-        // Variants
-        'variant': 'Variant',
-        'enter_variant_name': 'Enter variant name (e.g. Color, Size)',
-        'enter_variant_value': 'Enter a value and press Enter',
-        
-        // Validation Messages
-        'field_required': 'This field is required',
-        'min_length': 'Minimum {min} characters required',
-        'max_length': 'Maximum {max} characters allowed',
-        'invalid_price': 'Please enter a valid price',
-        'invalid_quantity': 'Please enter a valid quantity',
-        'invalid_file_format': 'Unsupported file format',
-        'file_too_large': 'File too large (max {size}MB)',
-        'max_images_reached': 'Maximum {max} images allowed',
-        'duplicate_value': 'This value already exists',
-        'max_values_reached': 'Maximum {max} values allowed',
-        'variant_name_required': 'Variant name is required',
-        'variant_values_required': 'At least one value is required',
-        
-        // Success Messages
+        // Messages
         'product_saved': 'Product saved successfully',
         'draft_saved': 'Draft saved',
         'form_reset': 'Form reset',
         'variant_added': 'Variant added',
         'variant_removed': 'Variant removed',
-        'value_added': 'Value added',
-        'value_removed': 'Value removed',
-        'auto_save_restored': 'Auto-saved data restored',
-        
-        // Error Messages
-        'save_error': 'Error saving product',
-        'network_error': 'Network error',
-        'validation_error': 'Please fix errors in the form',
-        'load_error': 'Error loading data',
-        
-        // Modal
+        'field_required': 'This field is required',
+        'saving': 'Saving...',
         'success': 'Success',
         'error': 'Error',
         'warning': 'Warning',
-        'confirm': 'Confirmation',
-        'info': 'Information',
-        
-        // Loading
-        'saving': 'Saving...',
-        'loading': 'Loading...',
-        'processing': 'Processing...',
-        
-        // Other
-        'confirm_action': 'Are you sure you want to perform this action?',
-        'unsaved_changes': 'You have unsaved changes. Do you really want to leave?'
+        'info': 'Information'
     }
 };
 
@@ -294,139 +218,6 @@ function toggleLanguage() {
     updateLanguage();
 }
 
-// ===== VALIDATION SYSTEM =====
-function initValidationRules() {
-    validationRules = {
-        productName: {
-            required: true,
-            minLength: 3,
-            maxLength: 100
-        },
-        productPrice: {
-            required: true,
-            type: 'number',
-            min: 0
-        },
-        productQuantity: {
-            type: 'number',
-            min: 0
-        },
-        shortDescription: {
-            required: true,
-            minLength: 10,
-            maxLength: 200
-        },
-        detailedDescription: {
-            required: true,
-            minLength: 30,
-            maxLength: 2000
-        }
-    };
-}
-
-function validateField(fieldName, value, showError = true) {
-    const rules = validationRules[fieldName];
-    if (!rules) return true;
-    
-    const field = document.getElementById(fieldName);
-    const errorElement = document.getElementById(fieldName + 'Error');
-    
-    // Clear previous validation state
-    if (field) {
-        field.classList.remove('valid', 'invalid');
-    }
-    if (errorElement) {
-        errorElement.classList.remove('show');
-        errorElement.textContent = '';
-    }
-    
-    // Required validation
-    if (rules.required && (!value || value.toString().trim() === '')) {
-        if (showError) {
-            showFieldError(fieldName, translate('field_required'));
-        }
-        return false;
-    }
-    
-    // Skip other validations if field is empty and not required
-    if (!value || value.toString().trim() === '') {
-        if (field) field.classList.add('valid');
-        return true;
-    }
-    
-    // Type validation
-    if (rules.type === 'number') {
-        const numValue = parseFloat(value);
-        if (isNaN(numValue)) {
-            if (showError) {
-                showFieldError(fieldName, fieldName.includes('price') ? translate('invalid_price') : translate('invalid_quantity'));
-            }
-            return false;
-        }
-        
-        // Min value validation
-        if (rules.min !== undefined && numValue < rules.min) {
-            if (showError) {
-                showFieldError(fieldName, fieldName.includes('price') ? translate('invalid_price') : translate('invalid_quantity'));
-            }
-            return false;
-        }
-    }
-    
-    // Length validation
-    if (rules.minLength && value.length < rules.minLength) {
-        if (showError) {
-            showFieldError(fieldName, translate('min_length', { min: rules.minLength }));
-        }
-        return false;
-    }
-    
-    if (rules.maxLength && value.length > rules.maxLength) {
-        if (showError) {
-            showFieldError(fieldName, translate('max_length', { max: rules.maxLength }));
-        }
-        return false;
-    }
-    
-    // Field is valid
-    if (field) {
-        field.classList.add('valid');
-    }
-    
-    return true;
-}
-
-function showFieldError(fieldName, message) {
-    const field = document.getElementById(fieldName);
-    const errorElement = document.getElementById(fieldName + 'Error');
-    
-    if (field) {
-        field.classList.add('invalid');
-        field.classList.remove('valid');
-    }
-    
-    if (errorElement) {
-        errorElement.textContent = message;
-        errorElement.classList.add('show');
-    }
-}
-
-function validateForm() {
-    let isValid = true;
-    
-    // Validate basic fields
-    Object.keys(validationRules).forEach(fieldName => {
-        const field = document.getElementById(fieldName);
-        const value = field ? field.value : '';
-        
-        if (!validateField(fieldName, value, true)) {
-            isValid = false;
-        }
-    });
-    
-    return isValid;
-}
-
 // ===== PROGRESS BAR =====
 function calculateProgress() {
     const fields = [
@@ -487,7 +278,7 @@ function updateProgressText() {
     }
 }
 
-// ===== DROPZONE SETUP =====
+// ===== DROPZONE FUNCTIONS =====
 function initDropzones() {
     const mainImageDropzone = document.getElementById('mainImageDropzone');
     const galleryDropzone = document.getElementById('imageGalleryDropzone');
@@ -505,7 +296,8 @@ function initDropzones() {
 
 function setupDropzone(dropzone, input, isMultiple) {
     // Click to select
-    dropzone.addEventListener('click', () => {
+    dropzone.addEventListener('click', (e) => {
+        e.preventDefault();
         input.click();
     });
     
@@ -542,7 +334,7 @@ function handleFileSelection(files, isMultiple) {
             formData.mainImage = file;
             displaySelectedFile(file, 'mainImageDropzone');
             calculateProgress();
-            autoSaveForm();
+            showToast('success', translate('success'), 'Image principale ajoutée avec succès');
         }
     } else if (isMultiple) {
         // Gallery images
@@ -551,7 +343,7 @@ function handleFileSelection(files, isMultiple) {
             formData.galleryImages = [...formData.galleryImages, ...validFiles].slice(0, 5);
             displaySelectedFiles(formData.galleryImages, 'imageGalleryDropzone');
             calculateProgress();
-            autoSaveForm();
+            showToast('success', translate('success'), `${validFiles.length} image(s) ajoutée(s) à la galerie`);
         }
     }
 }
@@ -561,12 +353,12 @@ function validateFile(file) {
     const maxSize = 5 * 1024 * 1024; // 5MB
     
     if (!allowedTypes.includes(file.type)) {
-        showToast('error', translate('error'), translate('invalid_file_format'));
+        showToast('error', translate('error'), 'Format de fichier non supporté');
         return false;
     }
     
     if (file.size > maxSize) {
-        showToast('error', translate('error'), translate('file_too_large', { size: 5 }));
+        showToast('error', translate('error'), 'Fichier trop volumineux (max 5MB)');
         return false;
     }
     
@@ -595,4 +387,185 @@ function displaySelectedFiles(files, dropzoneId) {
     
     const content = dropzone.querySelector('.dropzone-content');
     content.innerHTML = `
-        <div cl
+        <div class="selected-files">
+            ${files.map((file, index) => `
+                <div class="selected-file">
+                    <i class="fas fa-image"></i>
+                    <span>${file.name}</span>
+                    <button type="button" class="remove-file" onclick="removeGalleryImage(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+function removeMainImage() {
+    formData.mainImage = null;
+    const dropzone = document.getElementById('mainImageDropzone');
+    if (dropzone) {
+        const content = dropzone.querySelector('.dropzone-content');
+        content.innerHTML = `
+            <i class="fas fa-cloud-upload-alt"></i>
+            <h4 data-key="drop_main_image_here">Glissez votre image principale ici</h4>
+            <p data-key="or_click_to_select">ou cliquez pour sélectionner</p>
+            <small data-key="png_jpg_webp_5mb">PNG, JPG, WEBP jusqu'à 5MB</small>
+        `;
+    }
+    calculateProgress();
+    showToast('info', translate('info'), 'Image principale supprimée');
+}
+
+function removeGalleryImage(index) {
+    formData.galleryImages.splice(index, 1);
+    displaySelectedFiles(formData.galleryImages, 'imageGalleryDropzone');
+    calculateProgress();
+    showToast('info', translate('info'), 'Image supprimée de la galerie');
+}
+
+// ===== VARIANT FUNCTIONS =====
+function addVariant() {
+    const variantId = generateId();
+    variantCounter++;
+    
+    const variant = {
+        id: variantId,
+        name: '',
+        values: []
+    };
+    
+    formData.variants.push(variant);
+    
+    const variantsContainer = document.getElementById('variantsContainer');
+    const variantHtml = `
+        <div class="variant-item" data-variant-id="${variantId}">
+            <div class="variant-header">
+                <h4 class="variant-title">${translate('variant')} ${variantCounter}</h4>
+                <button type="button" class="variant-remove" onclick="removeVariant('${variantId}')">
+                    <i class="fas fa-trash"></i>
+                    <span>${translate('remove')}</span>
+                </button>
+            </div>
+            
+            <div class="variant-content">
+                <div class="form-field variant-name-input">
+                    <label>${translate('variant_name')}</label>
+                    <div class="input-container">
+                        <input type="text" placeholder="ex: Couleur, Taille" onchange="updateVariantName('${variantId}', this.value)">
+                        <div class="input-icon">
+                            <i class="fas fa-tag"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-field variant-values">
+                    <label>${translate('variant_value')}</label>
+                    <div class="values-input-container">
+                        <input type="text" placeholder="Entrez une valeur" onkeypress="handleVariantValueKeyPress(event, '${variantId}')">
+                        <button type="button" class="add-value-btn" onclick="addVariantValue('${variantId}')">
+                            <i class="fas fa-plus"></i>
+                            <span>${translate('add_value')}</span>
+                        </button>
+                    </div>
+                    <div class="tags-display" id="tags-${variantId}"></div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    variantsContainer.insertAdjacentHTML('beforeend', variantHtml);
+    calculateProgress();
+    showToast('success', translate('success'), translate('variant_added'));
+}
+
+function removeVariant(variantId) {
+    formData.variants = formData.variants.filter(v => v.id !== variantId);
+    const variantElement = document.querySelector(`[data-variant-id="${variantId}"]`);
+    if (variantElement) {
+        variantElement.remove();
+    }
+    calculateProgress();
+    showToast('info', translate('info'), translate('variant_removed'));
+}
+
+function updateVariantName(variantId, name) {
+    const variant = formData.variants.find(v => v.id === variantId);
+    if (variant) {
+        variant.name = name;
+        calculateProgress();
+    }
+}
+
+function handleVariantValueKeyPress(event, variantId) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        addVariantValue(variantId);
+    }
+}
+
+function addVariantValue(variantId) {
+    const variantElement = document.querySelector(`[data-variant-id="${variantId}"]`);
+    const input = variantElement.querySelector('.values-input-container input');
+    const value = input.value.trim();
+    
+    if (!value) return;
+    
+    const variant = formData.variants.find(v => v.id === variantId);
+    if (variant) {
+        if (!variant.values.includes(value)) {
+            variant.values.push(value);
+            input.value = '';
+            updateVariantTags(variantId);
+            calculateProgress();
+            showToast('success', translate('success'), `Valeur "${value}" ajoutée`);
+        } else {
+            showToast('warning', translate('warning'), 'Cette valeur existe déjà');
+        }
+    }
+}
+
+function removeVariantValue(variantId, value) {
+    const variant = formData.variants.find(v => v.id === variantId);
+    if (variant) {
+        variant.values = variant.values.filter(v => v !== value);
+        updateVariantTags(variantId);
+        calculateProgress();
+        showToast('info', translate('info'), `Valeur "${value}" supprimée`);
+    }
+}
+
+function updateVariantTags(variantId) {
+    const tagsContainer = document.getElementById(`tags-${variantId}`);
+    const variant = formData.variants.find(v => v.id === variantId);
+    
+    if (tagsContainer && variant) {
+        tagsContainer.innerHTML = variant.values.map(value => `
+            <span class="tag">
+                ${value}
+                <button type="button" class="tag-remove" onclick="removeVariantValue('${variantId}', '${value}')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </span>
+        `).join('');
+        
+        if (variant.values.length > 0) {
+            tagsContainer.classList.add('has-tags');
+        } else {
+            tagsContainer.classList.remove('has-tags');
+        }
+    }
+}
+
+// ===== FORM FUNCTIONS =====
+function validateForm() {
+    const productName = document.getElementById('productName').value.trim();
+    const productPrice = document.getElementById('productPrice').value.trim();
+    const shortDescription = document.getElementById('shortDescription').value.trim();
+    const detailedDescription = document.getElementById('detailedDescription').value.trim();
+    
+    const errors = [];
+    
+    if (!productName) errors.push('Le nom du produit est requis');
+    if (!productPrice) errors.push('Le prix est requis');
+    if (!shortDescription
