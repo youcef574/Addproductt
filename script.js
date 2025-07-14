@@ -298,21 +298,26 @@ function setupDropzone(dropzone, input, isMultiple) {
     // Click to select
     dropzone.addEventListener('click', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         input.click();
     });
     
     // Drag and drop
     dropzone.addEventListener('dragover', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         dropzone.classList.add('dragover');
     });
     
-    dropzone.addEventListener('dragleave', () => {
+    dropzone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         dropzone.classList.remove('dragover');
     });
     
     dropzone.addEventListener('drop', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         dropzone.classList.remove('dragover');
         
         const files = Array.from(e.dataTransfer.files);
@@ -323,6 +328,8 @@ function setupDropzone(dropzone, input, isMultiple) {
     input.addEventListener('change', (e) => {
         const files = Array.from(e.target.files);
         handleFileSelection(files, isMultiple);
+        // Reset input value to allow selecting the same file again
+        e.target.value = '';
     });
 }
 
@@ -332,18 +339,25 @@ function handleFileSelection(files, isMultiple) {
         const file = files[0];
         if (validateFile(file)) {
             formData.mainImage = file;
-            displaySelectedFile(file, 'mainImageDropzone');
+            displayMainImagePreview(file);
             calculateProgress();
-            showToast('success', translate('success'), 'Image principale ajoutée avec succès');
+            showToast('success', translate('success'), translate('success') + ': Image principale ajoutée');
         }
     } else if (isMultiple) {
         // Gallery images
         const validFiles = files.filter(validateFile);
         if (validFiles.length > 0) {
-            formData.galleryImages = [...formData.galleryImages, ...validFiles].slice(0, 5);
-            displaySelectedFiles(formData.galleryImages, 'imageGalleryDropzone');
+            // Limit to 5 total images
+            const remainingSlots = 5 - formData.galleryImages.length;
+            const filesToAdd = validFiles.slice(0, remainingSlots);
+            formData.galleryImages = [...formData.galleryImages, ...filesToAdd];
+            displayGalleryPreviews();
             calculateProgress();
-            showToast('success', translate('success'), `${validFiles.length} image(s) ajoutée(s) à la galerie`);
+            showToast('success', translate('success'), `${filesToAdd.length} image(s) ajoutée(s) à la galerie`);
+            
+            if (validFiles.length > remainingSlots) {
+                showToast('warning', translate('warning'), `Seulement ${remainingSlots} image(s) ajoutée(s). Maximum 5 images autorisées.`);
+            }
         }
     }
 }
@@ -353,54 +367,50 @@ function validateFile(file) {
     const maxSize = 5 * 1024 * 1024; // 5MB
     
     if (!allowedTypes.includes(file.type)) {
-        showToast('error', translate('error'), 'Format de fichier non supporté');
+        showToast('error', translate('error'), 'Format de fichier non supporté. Utilisez JPG, PNG ou WebP.');
         return false;
     }
     
     if (file.size > maxSize) {
-        showToast('error', translate('error'), 'Fichier trop volumineux (max 5MB)');
+        showToast('error', translate('error'), 'Fichier trop volumineux. Taille maximum: 5MB');
         return false;
     }
     
     return true;
 }
 
-function displaySelectedFile(file, dropzoneId) {
-    const dropzone = document.getElementById(dropzoneId);
+function displayMainImagePreview(file) {
+    const dropzone = document.getElementById('mainImageDropzone');
     if (!dropzone) return;
     
-    const content = dropzone.querySelector('.dropzone-content');
+    // Create image preview URL
+    const imageUrl = URL.createObjectURL(file);
     
-    // Create image preview
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        content.innerHTML = `
-            <div class="image-preview-container">
-                <div class="image-preview">
-                    <img src="${e.target.result}" alt="${file.name}" class="preview-image">
-                    <div class="image-overlay">
-                        <button type="button" class="remove-image-btn" onclick="removeMainImage()">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
+    const content = dropzone.querySelector('.dropzone-content');
+    content.innerHTML = `
+        <div class="image-preview">
+            <img src="${imageUrl}" alt="Preview" class="preview-image">
+            <div class="image-overlay">
                 <div class="image-info">
+                    <i class="fas fa-image"></i>
                     <span class="image-name">${file.name}</span>
                     <span class="image-size">${formatFileSize(file.size)}</span>
                 </div>
+                <button type="button" class="remove-image-btn" onclick="removeMainImage()">
+                    <i class="fas fa-trash"></i>
+                </button>
             </div>
-        `;
-    };
-    reader.readAsDataURL(file);
+        </div>
+    `;
 }
 
-function displaySelectedFiles(files, dropzoneId) {
-    const dropzone = document.getElementById(dropzoneId);
+function displayGalleryPreviews() {
+    const dropzone = document.getElementById('imageGalleryDropzone');
     if (!dropzone) return;
     
     const content = dropzone.querySelector('.dropzone-content');
     
-    if (files.length === 0) {
+    if (formData.galleryImages.length === 0) {
         content.innerHTML = `
             <i class="fas fa-images"></i>
             <h4 data-key="add_additional_images">Ajoutez des images supplémentaires</h4>
@@ -410,46 +420,43 @@ function displaySelectedFiles(files, dropzoneId) {
         return;
     }
     
-    let imagesHtml = '<div class="gallery-preview-container">';
-    let loadedImages = 0;
-    
-    files.forEach((file, index) => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const imageHtml = `
-                <div class="gallery-image-preview" data-index="${index}">
-                    <img src="${e.target.result}" alt="${file.name}" class="gallery-preview-image">
-                    <div class="gallery-image-overlay">
-                        <button type="button" class="remove-gallery-btn" onclick="removeGalleryImage(${index})">
-                            <i class="fas fa-trash"></i>
-                        </button>
+    const previewsHtml = formData.galleryImages.map((file, index) => {
+        const imageUrl = URL.createObjectURL(file);
+        return `
+            <div class="gallery-preview">
+                <img src="${imageUrl}" alt="Preview ${index + 1}" class="preview-image">
+                <div class="image-overlay">
+                    <div class="image-info">
+                        <span class="image-name">${file.name}</span>
+                        <span class="image-size">${formatFileSize(file.size)}</span>
                     </div>
-                    <div class="gallery-image-info">
-                        <span class="gallery-image-name">${file.name}</span>
-                        <span class="gallery-image-size">${formatFileSize(file.size)}</span>
-                    </div>
+                    <button type="button" class="remove-image-btn" onclick="removeGalleryImage(${index})">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
-            `;
-            
-            loadedImages++;
-            if (loadedImages === 1) {
-                imagesHtml += imageHtml;
-            } else {
-                const container = content.querySelector('.gallery-preview-container');
-                if (container) {
-                    container.insertAdjacentHTML('beforeend', imageHtml);
-                }
-            }
-            
-            if (loadedImages === files.length) {
-                imagesHtml += '</div>';
-                if (loadedImages === 1) {
-                    content.innerHTML = imagesHtml;
-                }
-            }
-        };
-        reader.readAsDataURL(file);
-    });
+            </div>
+        `;
+    }).join('');
+    
+    const addMoreButton = formData.galleryImages.length < 5 ? `
+        <div class="add-more-images" onclick="document.getElementById('imageGallery').click()">
+            <i class="fas fa-plus"></i>
+            <span>Ajouter plus d'images</span>
+            <small>${formData.galleryImages.length}/5</small>
+        </div>
+    ` : `
+        <div class="gallery-limit-reached">
+            <i class="fas fa-check-circle"></i>
+            <span>Maximum d'images atteint (5/5)</span>
+        </div>
+    `;
+    
+    content.innerHTML = `
+        <div class="gallery-previews">
+            ${previewsHtml}
+            ${addMoreButton}
+        </div>
+    `;
 }
 
 function formatFileSize(bytes) {
@@ -460,13 +467,52 @@ function formatFileSize(bytes) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
+function displaySelectedFile(file, dropzoneId) {
+    const dropzone = document.getElementById(dropzoneId);
+    if (!dropzone) return;
+    
+    const content = dropzone.querySelector('.dropzone-content');
+    content.innerHTML = `
+        <div class="selected-file">
+            <i class="fas fa-image"></i>
+            <span>${file.name}</span>
+            <button type="button" class="remove-file" onclick="removeMainImage()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+}
+
+function displaySelectedFiles(files, dropzoneId) {
+    const dropzone = document.getElementById(dropzoneId);
+    if (!dropzone) return;
+    
+    const content = dropzone.querySelector('.dropzone-content');
+    content.innerHTML = `
+        <div class="selected-files">
+            ${files.map((file, index) => `
+                <div class="selected-file">
+                    <i class="fas fa-image"></i>
+                    <span>${file.name}</span>
+                    <button type="button" class="remove-file" onclick="removeGalleryImage(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
 function removeMainImage() {
-    formData.mainImage = null;
-    const mainImageInput = document.getElementById('mainImage');
-    if (mainImageInput) {
-        mainImageInput.value = '';
+    // Clean up object URL to prevent memory leaks
+    if (formData.mainImage) {
+        const existingImg = document.querySelector('#mainImageDropzone .preview-image');
+        if (existingImg) {
+            URL.revokeObjectURL(existingImg.src);
+        }
     }
     
+    formData.mainImage = null;
     const dropzone = document.getElementById('mainImageDropzone');
     if (dropzone) {
         const content = dropzone.querySelector('.dropzone-content');
@@ -483,12 +529,16 @@ function removeMainImage() {
 }
 
 function removeGalleryImage(index) {
-    formData.galleryImages.splice(index, 1);
-    const galleryInput = document.getElementById('imageGallery');
-    if (galleryInput) {
-        galleryInput.value = '';
+    // Clean up object URL to prevent memory leaks
+    if (formData.galleryImages[index]) {
+        const existingImgs = document.querySelectorAll('#imageGalleryDropzone .preview-image');
+        if (existingImgs[index]) {
+            URL.revokeObjectURL(existingImgs[index].src);
+        }
     }
-    displaySelectedFiles(formData.galleryImages, 'imageGalleryDropzone');
+    
+    formData.galleryImages.splice(index, 1);
+    displayGalleryPreviews();
     calculateProgress();
     showToast('info', translate('info'), 'Image supprimée de la galerie');
 }
