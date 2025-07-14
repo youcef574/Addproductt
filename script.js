@@ -568,4 +568,275 @@ function validateForm() {
     
     if (!productName) errors.push('Le nom du produit est requis');
     if (!productPrice) errors.push('Le prix est requis');
-    if (!shortDescription
+    if (!shortDescription) errors.push('La description courte est requise');
+    if (!detailedDescription) errors.push('La description détaillée est requise');
+    
+    if (errors.length > 0) {
+        showToast('error', translate('error'), errors.join('<br>'));
+        return false;
+    }
+    
+    return true;
+}
+
+function resetForm() {
+    if (confirm('Êtes-vous sûr de vouloir réinitialiser le formulaire?')) {
+        document.getElementById('productForm').reset();
+        formData = {
+            mainImage: null,
+            galleryImages: [],
+            variants: []
+        };
+        document.getElementById('variantsContainer').innerHTML = '';
+        variantCounter = 0;
+        
+        // Reset dropzones
+        const mainDropzone = document.getElementById('mainImageDropzone');
+        if (mainDropzone) {
+            const content = mainDropzone.querySelector('.dropzone-content');
+            content.innerHTML = `
+                <i class="fas fa-cloud-upload-alt"></i>
+                <h4 data-key="drop_main_image_here">Glissez votre image principale ici</h4>
+                <p data-key="or_click_to_select">ou cliquez pour sélectionner</p>
+                <small data-key="png_jpg_webp_5mb">PNG, JPG, WEBP jusqu'à 5MB</small>
+            `;
+        }
+        
+        const galleryDropzone = document.getElementById('imageGalleryDropzone');
+        if (galleryDropzone) {
+            const content = galleryDropzone.querySelector('.dropzone-content');
+            content.innerHTML = `
+                <i class="fas fa-images"></i>
+                <h4 data-key="add_additional_images">Ajoutez des images supplémentaires</h4>
+                <p data-key="up_to_5_images">Jusqu'à 5 images</p>
+                <small data-key="png_jpg_webp_5mb_each">PNG, JPG, WEBP jusqu'à 5MB chacune</small>
+            `;
+        }
+        
+        calculateProgress();
+        showToast('info', translate('info'), translate('form_reset'));
+    }
+}
+
+function previewProduct() {
+    showToast('info', translate('info'), 'Fonction d\'aperçu en cours de développement');
+}
+
+function saveDraft() {
+    showLoadingOverlay();
+    
+    setTimeout(() => {
+        hideLoadingOverlay();
+        showToast('success', translate('success'), translate('draft_saved'));
+    }, 1500);
+}
+
+function saveProduct() {
+    if (!validateForm()) return;
+    
+    showLoadingOverlay();
+    
+    // Simulate API call
+    setTimeout(() => {
+        hideLoadingOverlay();
+        showToast('success', translate('success'), translate('product_saved'));
+        showModal(translate('success'), 'Produit enregistré avec succès dans la base de données!');
+    }, 2000);
+}
+
+// ===== MODAL FUNCTIONS =====
+function showModal(title, message) {
+    const modal = document.getElementById('modalOverlay');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+    modal.classList.add('show');
+}
+
+function hideModal() {
+    const modal = document.getElementById('modalOverlay');
+    modal.classList.remove('show');
+}
+
+// ===== LOADING OVERLAY =====
+function showLoadingOverlay() {
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.classList.add('show');
+}
+
+function hideLoadingOverlay() {
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.classList.remove('show');
+}
+
+// ===== TOAST FUNCTIONS =====
+function showToast(type, title, message) {
+    const toastContainer = document.getElementById('toastContainer');
+    const toastId = generateId();
+    
+    const icons = {
+        success: 'fas fa-check-circle',
+        error: 'fas fa-times-circle',
+        warning: 'fas fa-exclamation-triangle',
+        info: 'fas fa-info-circle'
+    };
+    
+    const toastHtml = `
+        <div class="toast ${type}" id="toast-${toastId}">
+            <div class="toast-icon">
+                <i class="${icons[type]}"></i>
+            </div>
+            <div class="toast-content">
+                <div class="toast-title">${title}</div>
+                <div class="toast-message">${message}</div>
+            </div>
+            <button class="toast-close" onclick="hideToast('${toastId}')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+    
+    const toastElement = document.getElementById(`toast-${toastId}`);
+    setTimeout(() => {
+        toastElement.classList.add('show');
+    }, 100);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        hideToast(toastId);
+    }, 5000);
+}
+
+function hideToast(toastId) {
+    const toast = document.getElementById(`toast-${toastId}`);
+    if (toast) {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }
+}
+
+// ===== INITIALIZATION =====
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize language
+    updateLanguage();
+    
+    // Initialize dropzones
+    initDropzones();
+    
+    // Initialize progress bar
+    calculateProgress();
+    
+    // Set up event listeners
+    setupEventListeners();
+    
+    // Auto-save every 30 seconds
+    autoSaveInterval = setInterval(() => {
+        const form = document.getElementById('productForm');
+        if (form) {
+            localStorage.setItem('productFormData', JSON.stringify(formData));
+        }
+    }, 30000);
+});
+
+function setupEventListeners() {
+    // Language toggle
+    const langToggle = document.getElementById('langToggle');
+    if (langToggle) {
+        langToggle.addEventListener('click', toggleLanguage);
+    }
+    
+    // User menu toggle
+    const menuToggle = document.getElementById('menuToggle');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    
+    if (menuToggle && dropdownMenu) {
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('active');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!dropdownMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+                dropdownMenu.classList.remove('active');
+            }
+        });
+    }
+    
+    // Form buttons
+    const resetBtn = document.getElementById('resetBtn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', resetForm);
+    }
+    
+    const previewBtn = document.getElementById('previewBtn');
+    if (previewBtn) {
+        previewBtn.addEventListener('click', previewProduct);
+    }
+    
+    const draftBtn = document.getElementById('draftBtn');
+    if (draftBtn) {
+        draftBtn.addEventListener('click', saveDraft);
+    }
+    
+    // Add variant button
+    const addVariantBtn = document.getElementById('addVariantBtn');
+    if (addVariantBtn) {
+        addVariantBtn.addEventListener('click', addVariant);
+    }
+    
+    // Form submission
+    const productForm = document.getElementById('productForm');
+    if (productForm) {
+        productForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            saveProduct();
+        });
+    }
+    
+    // Modal close
+    const modalClose = document.getElementById('modalClose');
+    const modalConfirm = document.getElementById('modalConfirm');
+    const modalOverlay = document.getElementById('modalOverlay');
+    
+    if (modalClose) {
+        modalClose.addEventListener('click', hideModal);
+    }
+    
+    if (modalConfirm) {
+        modalConfirm.addEventListener('click', hideModal);
+    }
+    
+    if (modalOverlay) {
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                hideModal();
+            }
+        });
+    }
+    
+    // Form field change listeners for progress calculation
+    const formFields = ['productName', 'productPrice', 'productQuantity', 'shortDescription', 'detailedDescription'];
+    formFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.addEventListener('input', debounce(calculateProgress, 300));
+        }
+    });
+}
+
+// ===== GLOBAL FUNCTIONS (for onclick handlers) =====
+window.removeMainImage = removeMainImage;
+window.removeGalleryImage = removeGalleryImage;
+window.removeVariant = removeVariant;
+window.updateVariantName = updateVariantName;
+window.handleVariantValueKeyPress = handleVariantValueKeyPress;
+window.addVariantValue = addVariantValue;
+window.removeVariantValue = removeVariantValue;
+window.hideToast = hideToast;
